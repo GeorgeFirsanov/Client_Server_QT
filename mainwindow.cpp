@@ -24,7 +24,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    uint port = 1111;
+    uint port = 2323;
     socket ->connectToHost("127.0.0.1", port);
 }
 
