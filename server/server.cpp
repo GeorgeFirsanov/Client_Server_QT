@@ -1,5 +1,5 @@
 #include "server.h"
-#include <QDataStream>
+
 
 Server::Server()
 {
@@ -12,6 +12,7 @@ Server::Server()
     {
         qDebug() << "error";
     }
+    nextBlockSize = 0;
 }
 
 void Server::incomingConnection(qintptr socketDescriptor)
@@ -33,10 +34,27 @@ void Server::slotReadyRead()
     if(in.status() == QDataStream::Ok)
     {
         qDebug() << "read";
-        QString str;
-        in >> str;
-        qDebug() << str;
-        SendToClient(str);
+        while(true)
+        {
+
+            if(nextBlockSize == 0)
+            {
+                qDebug() << "nBS = 0";
+                if(socket->bytesAvailable()<2)
+                    break;
+                in >> nextBlockSize;
+                qDebug() << "nBS = " << nextBlockSize;
+            }
+            if(socket->bytesAvailable() < nextBlockSize)
+                break;
+            QString str;
+            QTime time;
+            in >> time >> str;
+            nextBlockSize = 0;
+            SendToClient(str);
+            qDebug() << str;
+            break;
+        }
     }
     else
     {
@@ -49,7 +67,9 @@ void Server::SendToClient(QString str)
     Data.clear();
     QDataStream out(&Data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_DefaultCompiledVersion);
-    out << str;
+    out << qint16(0) << QTime::currentTime() << str;
+    out.device()->seek(0);
+    out <<quint16(Data.size() - sizeof(quint16));
     for(int i = 0; i < Sockets.size(); i++)
     {
        Sockets[i]->write(Data);
