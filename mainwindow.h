@@ -36,6 +36,8 @@ private:
     void SendToServer(QString str, quint16 type);
     void SetTimeDate();
     QString GetDataFromForm();
+    quint16 nextBlockSize;
+    quint16 type;
 
 public slots:
     void slotReadyRead();

@@ -39,7 +39,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    uint port = 1111;
+    uint port = 2323;
     socket ->connectToHost("127.0.0.1", port);
 }
 
@@ -48,13 +48,10 @@ void MainWindow::SendToServer(QString str, quint16 type)
     Data.clear();
     QDataStream out(&Data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_DefaultCompiledVersion);
-    if(type != 0)
-    {
-        out << quint16(0) << quint16(type)<< str;
-    }
-    else
-        out << qint16(0) << QTime::currentTime() << str;
-    //out << str;
+
+    out << quint16(0) << quint16(type) << QTime::currentTime() << str;
+    out.device()->seek(0);
+    out << quint16(Data.size() - sizeof(quint16));
     socket -> write(Data);
     ui->lineEdit->clear();
 }
@@ -65,6 +62,23 @@ void MainWindow::slotReadyRead()
     in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
     if(in.status()== QDataStream::Ok)
     {
+        while(true)
+        {
+            if(nextBlockSize == 0)
+            {
+                if(socket->bytesAvailable()<2)
+                    break;
+                in >> nextBlockSize;
+            }
+            if(socket->bytesAvailable() < nextBlockSize)
+                break;
+            in >> type;
+
+            QString str;
+            QTime time;
+            in >> time >> str;
+            nextBlockSize = 0;
+        }
         QString str;
         in >>str;
         ui->textBrowser->append(str);
@@ -75,7 +89,7 @@ void MainWindow::slotReadyRead()
     }
 }
 /*
- {
+ *{
     socket = (QTcpSocket*)sender();
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
