@@ -62,6 +62,8 @@ void MainWindow::slotReadyRead()
     in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
     if(in.status()== QDataStream::Ok)
     {
+        QString str;
+        QTime time;
         while(true)
         {
             if(nextBlockSize == 0)
@@ -73,15 +75,16 @@ void MainWindow::slotReadyRead()
             if(socket->bytesAvailable() < nextBlockSize)
                 break;
             in >> type;
-
-            QString str;
-            QTime time;
             in >> time >> str;
             nextBlockSize = 0;
         }
-        QString str;
-        in >>str;
-        ui->textBrowser->append(str);
+        if(type == 0)
+            ui->textBrowser->append(str);
+        else
+        {
+            ui->textBrowser_2->clear();
+            ui->textBrowser_2->append(str);
+        }
     }
     else
     {
