@@ -13,7 +13,22 @@ MainWindow::MainWindow(QWidget *parent)
     {
         ui->tableWidget->insertColumn(i);
         ui->tableWidget->insertRow(i);
+
+        QString t= nullptr;
+        if(i!= ui->spinBox->value())
+        {
+            t = QString("X");
+            t += QString::number(i);
+        }
+        else
+        {
+            t =  QString("B");
+        }
+        ui->tableWidget->setItem(0, i, new QTableWidgetItem(t));
     }
+    QString t = QString("Bi");
+    ui->tableWidget->setItem(ui->tableWidget->columnCount(), 0, new QTableWidgetItem(t));
+
 }
 
 MainWindow::~MainWindow()
@@ -57,47 +72,91 @@ void MainWindow::slotReadyRead()
 
 void MainWindow::on_pushButton_2_clicked()
 {
+    SetTimeDate();
     SendToServer(ui->lineEdit->text());
 }
 
 
 void MainWindow::on_lineEdit_returnPressed()
 {
+    SetTimeDate();
     SendToServer(ui->lineEdit->text());
-}
-
-
-void MainWindow::on_spinBox_valueChanged(int arg1)
-{
-    for(; ui->spinBox->value() > ui->tableWidget->rowCount() - 1;)
-    {
-        ui->tableWidget->insertColumn(ui->tableWidget->rowCount() - 1);
-        ui->tableWidget->insertRow(ui->tableWidget->rowCount());
-    }
-
-    for(; ui->spinBox->value() < ui->tableWidget->rowCount() - 1;)
-    {
-        ui->tableWidget->removeColumn(ui->tableWidget->rowCount() - 1);
-        ui->tableWidget->removeRow(ui->tableWidget->rowCount());
-        break;
-
-    }
 }
 
 
 void MainWindow::on_spinBox_valueChanged(const QString &arg1)
 {
-    for(; ui->spinBox->value() > ui->tableWidget->rowCount() - 1;)
+    for(int i = ui->tableWidget->rowCount()-1; ui->spinBox->value() > i; i = ui->tableWidget->rowCount()-1)
     {
-        ui->tableWidget->insertColumn(ui->tableWidget->rowCount() - 1);
-        ui->tableWidget->insertRow(ui->tableWidget->rowCount());
+        ui->tableWidget->insertColumn(i);
+        ui->tableWidget->insertRow(i);
+        QString t = QString("X");
+        t += QString::number(i);
+        ui->tableWidget->setItem(0, i, new QTableWidgetItem(t));
     }
-
-    for(; ui->spinBox->value() < ui->tableWidget->rowCount() - 1;)
+    for(int i = ui->tableWidget->rowCount()-1; ui->spinBox->value() < i; i = ui->tableWidget->rowCount()-1)
     {
-        ui->tableWidget->removeColumn(ui->tableWidget->rowCount() - 1);
-        ui->tableWidget->removeRow(ui->tableWidget->rowCount());
-        break;
+        ui->tableWidget->removeColumn(i-1);
+        ui->tableWidget->removeRow(i);
     }
 }
 
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    SetTimeDate();
+    QString str = GetDataFromForm();
+    SendToServer(str);
+}
+
+QString MainWindow::GetDataFromForm()
+{
+    QString str;
+    ui->textBrowser_2->clear();
+    for(int i = 1; i< ui->tableWidget->rowCount(); i++)
+    {
+        for(int j = 0; j< ui->tableWidget->columnCount() - 1 ; j++)
+        {
+            QTableWidgetItem *item1(ui->tableWidget->item(i,j));
+            if (item1)
+            {
+                QString R1 = item1->text();
+                bool b = !R1.isEmpty() && !R1.isNull();
+                if(b)
+                {
+                    // Make query to server to send and get data
+                     str += QString::number( ui->tableWidget->item(i,j)->text().toInt() ); //some data
+                     str += " ";
+                }
+            }
+        }
+        //Show the result
+        //QString t = QString("X");
+        //t+= QString::number(i)+"= "+QString::number(0) ;
+        //ui->textBrowser_2->append(t);
+    }
+    str +="|";
+    int columncount = ui->tableWidget->columnCount();
+    for(int i = 1; i< ui->tableWidget->rowCount(); i++)
+    {
+        QTableWidgetItem *item1(ui->tableWidget->item(i,columncount-1));
+        if (item1)
+        {
+            QString R1 = item1->text();
+            bool b = !R1.isEmpty() && !R1.isNull();
+            if(b)
+            {
+                str += QString::number( ui->tableWidget->item(i, columncount-1)->text().toInt() );
+                str += " ";
+            }
+        }
+    }
+     return str;
+}
+
+
+void MainWindow::SetTimeDate()
+{
+    ui->textBrowser_3->clear();
+    ui->textBrowser_3->append(QDateTime::currentDateTime().toString());
+}

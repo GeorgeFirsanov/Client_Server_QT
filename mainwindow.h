@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QTcpSocket>
+#include <stdio.h>
+#include <QDateTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,15 +25,17 @@ private slots:
 
     void on_lineEdit_returnPressed();
 
-    void on_spinBox_valueChanged(int arg1);
-
     void on_spinBox_valueChanged(const QString &arg1);
+
+    void on_pushButton_3_clicked();
 
 private:
     Ui::MainWindow *ui;
     QTcpSocket *socket;
     QByteArray Data;
     void SendToServer(QString str);
+    void SetTimeDate();
+    QString GetDataFromForm();
 
 public slots:
     void slotReadyRead();
