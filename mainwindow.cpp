@@ -43,12 +43,18 @@ void MainWindow::on_pushButton_clicked()
     socket ->connectToHost("127.0.0.1", port);
 }
 
-void MainWindow::SendToServer(QString str)
+void MainWindow::SendToServer(QString str, quint16 type)
 {
     Data.clear();
     QDataStream out(&Data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_DefaultCompiledVersion);
-    out << str;
+    if(type != 0)
+    {
+        out << quint16(0) << quint16(type)<< str;
+    }
+    else
+        out << qint16(0) << QTime::currentTime() << str;
+    //out << str;
     socket -> write(Data);
     ui->lineEdit->clear();
 }
@@ -68,19 +74,57 @@ void MainWindow::slotReadyRead()
         ui->textBrowser->append("read error");
     }
 }
+/*
+ {
+    socket = (QTcpSocket*)sender();
+    QDataStream in(socket);
+    in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
+    if(in.status() == QDataStream::Ok)
+    {
+        qDebug() << "read";
+        while(true)
+        {
+
+            if(nextBlockSize == 0)
+            {
+                qDebug() << "nBS = 0";
+                if(socket->bytesAvailable()<2)
+                    break;
+                in >> nextBlockSize;
+                qDebug() << "nBS = " << nextBlockSize;
+            }
+            if(socket->bytesAvailable() < nextBlockSize)
+                break;
+            in >> type;
+            qDebug() << "type = " << type;
+            QString str;
+            QTime time;
+            in >> time >> str;
+            nextBlockSize = 0;
+            SendToClient(str, type);
+            qDebug() << str;
+            break;
+        }
+    }
+    else
+    {
+        qDebug() << "DataStream error";
+    }
+}
+*/
 
 
 void MainWindow::on_pushButton_2_clicked()
 {
     SetTimeDate();
-    SendToServer(ui->lineEdit->text());
+    SendToServer(ui->lineEdit->text(), 0);
 }
 
 
 void MainWindow::on_lineEdit_returnPressed()
 {
     SetTimeDate();
-    SendToServer(ui->lineEdit->text());
+    SendToServer(ui->lineEdit->text(), 0);
 }
 
 
@@ -106,7 +150,7 @@ void MainWindow::on_pushButton_3_clicked()
 {
     SetTimeDate();
     QString str = GetDataFromForm();
-    SendToServer(str);
+    SendToServer(str, ui->spinBox->value());
 }
 
 QString MainWindow::GetDataFromForm()

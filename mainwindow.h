@@ -33,7 +33,7 @@ private:
     Ui::MainWindow *ui;
     QTcpSocket *socket;
     QByteArray Data;
-    void SendToServer(QString str);
+    void SendToServer(QString str, quint16 type);
     void SetTimeDate();
     QString GetDataFromForm();
 
