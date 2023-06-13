@@ -18,8 +18,11 @@ public:
 private:
     QVector <QTcpSocket*> Sockets;
     QByteArray Data;
-    void SendToClient(QString str);
+    void SendToClient(QString str, quint16 type);
     quint16 nextBlockSize;
+    quint16 type;
+    QString SolveSystem(QString str, int n);
+    double dabs(double val);
 
 public slots:
     void incomingConnection(qintptr socketDescriptor);
