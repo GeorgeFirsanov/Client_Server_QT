@@ -8,9 +8,6 @@ Server::Server()
     {
         qDebug() << "start";
         Data.clear();
-        QByteArray temp;
-                    QString test = "4 3 0 1 3 1 1 2 10|10 9 25 ";
-                    qDebug() << SolveSystem(test, 3);
     }
     else
     {
@@ -143,6 +140,7 @@ QString Server::SolveSystem(QString str, int n)
         for (int i = 0; i < n; i++)
         {
             res[i] = (double)masB[i] / masA[i][i];
+            qDebug() << res[i];
         }
 
         double eps = 0.0001;

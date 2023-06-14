@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
+    main.cpp \
     mainwindow.cpp
 
 HEADERS += \
