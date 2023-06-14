@@ -79,7 +79,7 @@ void MainWindow::slotReadyRead()
             nextBlockSize = 0;
         }
         if(type == 0)
-            ui->textBrowser->append(str);
+            ui->textBrowser->append(time.toString()+">>"+str);
         else
         {
             ui->textBrowser_2->clear();
@@ -91,45 +91,6 @@ void MainWindow::slotReadyRead()
         ui->textBrowser->append("read error");
     }
 }
-/*
- *{
-    socket = (QTcpSocket*)sender();
-    QDataStream in(socket);
-    in.setVersion(QDataStream::Qt_DefaultCompiledVersion);
-    if(in.status() == QDataStream::Ok)
-    {
-        qDebug() << "read";
-        while(true)
-        {
-
-            if(nextBlockSize == 0)
-            {
-                qDebug() << "nBS = 0";
-                if(socket->bytesAvailable()<2)
-                    break;
-                in >> nextBlockSize;
-                qDebug() << "nBS = " << nextBlockSize;
-            }
-            if(socket->bytesAvailable() < nextBlockSize)
-                break;
-            in >> type;
-            qDebug() << "type = " << type;
-            QString str;
-            QTime time;
-            in >> time >> str;
-            nextBlockSize = 0;
-            SendToClient(str, type);
-            qDebug() << str;
-            break;
-        }
-    }
-    else
-    {
-        qDebug() << "DataStream error";
-    }
-}
-*/
-
 
 void MainWindow::on_pushButton_2_clicked()
 {
@@ -196,7 +157,7 @@ QString MainWindow::GetDataFromForm()
         //t+= QString::number(i)+"= "+QString::number(0) ;
         //ui->textBrowser_2->append(t);
     }
-    str +="|";
+    str[str.length()-1] ='|';
     int columncount = ui->tableWidget->columnCount();
     for(int i = 1; i< ui->tableWidget->rowCount(); i++)
     {
@@ -209,6 +170,10 @@ QString MainWindow::GetDataFromForm()
             {
                 str += QString::number( ui->tableWidget->item(i, columncount-1)->text().toInt() );
                 str += " ";
+            }
+            else
+            {
+                str += "0 ";
             }
         }
     }
