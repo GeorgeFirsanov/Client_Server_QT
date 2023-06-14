@@ -21,7 +21,8 @@ void Server::incomingConnection(qintptr socketDescriptor)
     socket = new QTcpSocket;
     socket ->setSocketDescriptor(socketDescriptor);
     connect(socket, &QTcpSocket::readyRead, this, &Server::slotReadyRead);
-    connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+    //connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+    connect(socket, &QTcpSocket::disconnected, this, &Server::disconn);
 
     Sockets.push_back(socket);
     qDebug() << "client connected" << socketDescriptor;
@@ -65,6 +66,13 @@ void Server::slotReadyRead()
     }
 }
 
+void Server::disconn()
+{
+    auto ind = Sockets.indexOf(socket);
+    Sockets.removeAt(ind);
+    socket->deleteLater();
+}
+
 void Server::SendToClient(QString str, quint16 type)
 {
     Data.clear();
@@ -84,7 +92,7 @@ void Server::SendToClient(QString str, quint16 type)
         out <<quint16(Data.size() - sizeof(quint16));
         for(int i = 0; i < Sockets.size(); i++)
         {
-           Sockets[i]->write(Data);
+            Sockets[i]->write(Data);
         }
     }
 }
@@ -93,7 +101,6 @@ QString Server::SolveSystem(QString str, int n)
 {
     bool flag = false;
     int temp = 0, j = 0, k = 0;
-    n = 3;
     int masA[n][n];
     int masB[n];
     for(int i = 0; i < (str.size() - 1); i++)
@@ -145,8 +152,10 @@ QString Server::SolveSystem(QString str, int n)
 
         double eps = 0.0001;
         double Xn[n];
+        int num_of_iter = 0;
 
         do {
+            num_of_iter++;
             for (int i = 0; i < n; i++) {
                 Xn[i] = (double)masB[i] / masA[i][i];
                 for (j = 0; j < n; j++) {
@@ -172,7 +181,7 @@ QString Server::SolveSystem(QString str, int n)
 
             if (flag)
                 break;
-        } while (1);
+        } while (num_of_iter < 1000);
 
     for (int i = 0; i < n; i++)
         ans.push_back(QString::number(res[i], 'f', 3) + ' ');
