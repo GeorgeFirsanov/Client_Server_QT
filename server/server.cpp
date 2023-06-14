@@ -82,7 +82,7 @@ void Server::SendToClient(QString str, quint16 type)
     }
     else
     {
-        out << qint16(0) << QTime::currentTime() << str;
+        out << qint16(0) << quint16(type) << QTime::currentTime() << str;
         out.device()->seek(0);
         out <<quint16(Data.size() - sizeof(quint16));
         for(int i = 0; i < Sockets.size(); i++)
